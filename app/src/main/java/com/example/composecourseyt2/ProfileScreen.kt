@@ -1,9 +1,12 @@
 package com.example.composecourseyt2
 
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,10 +28,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -58,12 +64,14 @@ fun ProfileScreen(){
     var selectedTabIndex by remember {
         mutableStateOf(0)
     }
+    val context = LocalContext.current
+    val name = "aldianrahman"
     Column(
         modifier = Modifier.fillMaxSize()
 
     ) {
         TopBar(
-            name = "aldianrahman",
+            name = name,
             modifier = Modifier.padding(
                 top = 15.dp,
                 bottom = 10.dp,
@@ -72,7 +80,7 @@ fun ProfileScreen(){
             )
         )
         Spacer(modifier = Modifier.height(4.dp))
-        ProfileSection()
+        ProfileSection(name = name)
         Spacer(modifier = Modifier.height(10.dp))
         ButtonSection(modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(10.dp))
@@ -148,8 +156,12 @@ fun ProfileScreen(){
 
 @Composable
 fun ProfileSection(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    name: String
 ){
+    val imageResourceId = R.drawable.pic_resume
+    val showDialog = remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -160,10 +172,13 @@ fun ProfileSection(
                 .padding(horizontal = 15.dp)
         ){
             RoundImage(
-                image = painterResource(R.drawable.pic_resume),
+                image = painterResource(imageResourceId),
                 modifier = Modifier
                     .size(100.dp)
                     .weight(3f)
+                    .clickable {
+                        showDialog.value = true
+                    }
             )
             Spacer(modifier = Modifier.width(16.dp))
             StatSection(
@@ -178,6 +193,27 @@ fun ProfileSection(
             url = "https://bit.ly/3N2Dxjh",
             followedBy = listOf("google", "android"),
             otherCount = 10
+        )
+    }
+    if (showDialog.value) {
+        AlertDialog(
+            containerColor = Color.Transparent,
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(name, color = Color.Transparent) },
+            text = {
+                RoundImage(painterResource(imageResourceId),
+                modifier = Modifier.size(300.dp)
+                    .clickable {
+                    showDialog.value = false
+                    }
+                ) },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Close",color = Color.Transparent)
+                }
+            }
         )
     }
 }
@@ -497,6 +533,9 @@ fun PostSection(
     posts: List<Painter>,
     modifier: Modifier = Modifier
 ) {
+
+    val showDialogImage = remember { mutableStateOf(false) }
+    val context = LocalContext.current
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier
@@ -512,8 +551,29 @@ fun PostSection(
                     .border(
                         width = 1.dp,
                         color = Color.White
-                )
+                ).clickable {
+
+                        Toast.makeText(context, ""+ posts[it], Toast.LENGTH_SHORT).show()
+                        showDialogImage.value = true
+                }
             )
         }
+    }
+    if (showDialogImage.value) {
+        AlertDialog(
+            onDismissRequest = { showDialogImage.value = false },
+            title = { Text("Image") },
+            text = {
+                Image(painter = painterResource(R.drawable.pic_resume),
+                    contentDescription = null)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDialogImage.value = false }
+                ) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }
